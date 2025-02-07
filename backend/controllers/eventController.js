@@ -24,6 +24,7 @@ const eventController = async(req,res)=>{
 
 
 const getAllEventController = async (req, res) => {
+    const userId = req.userId;
     try {
         const events = await EventModel.find({ isPublic: true });
         console.log(events);
@@ -33,9 +34,13 @@ const getAllEventController = async (req, res) => {
                 message: "No public events found",
             });
         }
+        const eventsWithAttendanceStatus = events.map(event => ({
+            ...event.toObject(),
+            isAttending: event.attendees.some(id => id.toString() === userId.toString())
+        }));
         res.status(200).json({
             success: true,
-            data: events,
+            data: eventsWithAttendanceStatus
         });
     } catch (error) {
         console.error("Error fetching public events:", error);
@@ -59,4 +64,31 @@ const getEventControllerForEventManager = async(req,res)=>{
     }
 }
 
-module.exports = {eventController, getAllEventController, getEventControllerForEventManager};
+
+const registerStudentForEventController = async(req,res)=>{
+    const {eventId} = req.body;
+    const userId = req.userId;
+    if(!eventId){
+        return res.status(400).json({message: "Please provide event id"});
+    }
+    try {
+        const event = await EventModel.findOne({_id:eventId});
+        if(!event){
+            return res.status(404).json({message: "Event not found"});
+        }
+        if(event.maxAttendees <= event.attendees.length){
+            return res.status(400).json({message: "Event is full"});
+        }
+        if(event.attendees.includes(userId)){
+            return res.status(400).json({message: "You are already registered for this event"});
+        }
+        event.attendees.push(userId);
+        await event.save();
+        return res.status(200).json({success:true,data:event,message: "Registered successfully for the event"});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message: "Internal server error"});
+    }
+}
+
+module.exports = {eventController, getAllEventController, getEventControllerForEventManager, registerStudentForEventController};

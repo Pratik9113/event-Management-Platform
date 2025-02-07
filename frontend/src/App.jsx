@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from './components/Login'
 import EventList from './components/Event/EventList';
 import CreateEventForm from './components/Event/CreateEventForm';
+import Navbar from './components/Navbar';
 
 const App = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,13 +13,18 @@ const App = () => {
     <Router>
       <ToastContainer position="top-right" autoClose={3000} />
       {isLogin && <Login setIsLogin={setIsLogin} />}
-
-      <Routes>
-        {/* <Route path="/" element={<Login />} />
+      {!isLogin &&
+        <>
+          <Navbar />
+          <Routes>
+            {/* <Route path="/" element={<Login />} />
         <Route path='/' element={<EventList />} />
         <Route path='/' element={<CreateEventForm />} /> */}
-        <Route path='/' element={<EventList />} />
-      </Routes>
+            <Route path='/' element={<EventList />} />
+            <Route path='/create' element={<CreateEventForm />} />
+          </Routes>
+        </>
+      }
     </Router>
   )
 }

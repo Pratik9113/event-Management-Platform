@@ -9,7 +9,7 @@ const EventSchema = new mongoose.Schema({
     organizer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     maxAttendees: { type: Number, default: 100 },
-    status: { type: String, enum: ["Upcoming", "Ongoing", "Completed"], default: "Upcoming" },   
+    status: { type: String, enum: ["Upcoming", "Ongoing", "Completed"] }, 
     image: { type: String },
     isPublic: { type: Boolean, default: true },
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
