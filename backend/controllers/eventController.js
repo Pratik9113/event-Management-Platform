@@ -23,15 +23,29 @@ const eventController = async(req,res)=>{
 }
 
 
-const getAllEventController = async(req,res)=>{
+const getAllEventController = async (req, res) => {
     try {
-        const events = await EventModel.find({isPublic: true}); 
-        res.status(200).json({success:true,data:events});
+        const events = await EventModel.find({ isPublic: true });
+        console.log(events);
+        if (!events || events.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No public events found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: events,
+        });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({message: "Internal server error"});
+        console.error("Error fetching public events:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
     }
-}
+};
 
 
 const getEventControllerForEventManager = async(req,res)=>{

@@ -1,40 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin, Users, Tag, DollarSign } from 'lucide-react';
-
+import axios from "axios";
 const EventList = () => {
-    const [events] = useState([
-        {
-            _id: '1',
-            title: 'Tech Conference 2025',
-            description: 'Annual technology conference featuring industry leaders',
-            date: new Date('2025-03-15'),
-            location: 'San Francisco, CA',
-            category: 'Conference',
-            maxAttendees: 200,
-            attendees: [],
-            status: 'Upcoming',
-            image: '/api/placeholder/400/200',
-            price: 299,
-            tags: ['technology', 'networking', 'innovation']
-        },
-        {
-            _id: '2',
-            title: 'Web Development Workshop',
-            description: 'Hands-on workshop on modern web development',
-            date: new Date('2025-04-01'),
-            location: 'Online',
-            category: 'Workshop',
-            maxAttendees: 50,
-            attendees: [],
-            status: 'Upcoming',
-            image: '/api/placeholder/400/200',
-            price: 99,
-            tags: ['coding', 'web', 'learning']
-        }
-    ]);
-
+    const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
-
+    
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',
@@ -43,6 +13,31 @@ const EventList = () => {
             day: 'numeric'
         });
     };
+    useEffect(() => {
+        const getAllEvent = async () => {
+            try {
+                const url = `${import.meta.env.VITE_BACKEND}/event/all`;
+                const response = await axios.get(url, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.data.success) {
+                    setEvents(response.data.data);
+                } else {
+                    alert("Error in fetching data");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error in fetching data");
+            }
+
+        }
+        getAllEvent();
+    }, []);
+
+
+
 
     const EventCard = ({ event }) => (
         <div

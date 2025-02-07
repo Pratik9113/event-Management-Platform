@@ -1,8 +1,10 @@
 import React, { useContext, useState } from 'react'
 import axios from "axios"
 import { toast } from 'react-toastify';
+import { ImCross } from "react-icons/im";
+
 import './Login.css'
-const Login = () => {
+const Login = ({ setIsLogin }) => {
     const [currState, setCurrState] = useState("Login")
     const [data, setData] = useState({
         name: "",
@@ -34,7 +36,7 @@ const Login = () => {
             })
 
             if (response.data.data) {
-                alert("successfully login/signup")
+                setIsLogin(false);
                 toast.success(response.data.message);
             }
 
@@ -48,7 +50,10 @@ const Login = () => {
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
                 <div className="flex justify-between items-center text-black">
                     <h2 className="text-xl font-semibold">{currState}</h2>
-                    <img src="" alt="close" className="cursor-pointer" />
+                    <ImCross
+                        onClick={() => setIsLogin(false)}
+                        className="cursor-pointer text-xl"
+                    />
                 </div>
 
                 <form onSubmit={onLogin} className="mt-4 space-y-4">
