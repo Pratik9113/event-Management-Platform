@@ -25,7 +25,7 @@ const eventController = async(req,res)=>{
 
 const getAllEventController = async(req,res)=>{
     try {
-        const events = await EventModel.findById({isPublic: true}); 
+        const events = await EventModel.find({isPublic: true}); 
         res.status(200).json({success:true,data:events});
     } catch (error) {
         console.log(error);
