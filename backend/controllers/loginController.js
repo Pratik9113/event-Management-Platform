@@ -68,7 +68,7 @@ const signupController = async (req, res) => {
 
         return res.status(201).json({ 
             message: "Signup successful!", 
-            data: { name: newUser.name, email: newUser.email },
+            data:newUser,
             token: token,
         });
     } catch (error) {

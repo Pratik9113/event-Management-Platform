@@ -15,7 +15,6 @@ const loginSchema = new mongoose.Schema({
     },
     confirmPassword: {
         type: String,
-        
     }
 })
 
