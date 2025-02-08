@@ -15,7 +15,6 @@ const Navbar = () => {
                             <span>Event</span>
                         </span>
                     </div>
-
                     <div className="flex items-center md:hidden">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -24,7 +23,6 @@ const Navbar = () => {
                             {isOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
-
                     {/* Desktop menu */}
                     <div className="hidden md:flex items-center space-x-4">
                         <button className="flex items-center px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100"
@@ -39,7 +37,6 @@ const Navbar = () => {
                         </button>
                     </div>
                 </div>
-
                 {/* Mobile menu */}
                 <div className={`md:hidden ${isOpen ? 'block' : 'hidden'} pb-4`}>
                     <div className="space-y-2">

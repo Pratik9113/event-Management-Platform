@@ -112,8 +112,12 @@ const registerStudentForEventController = async(req,res)=>{
             return res.status(400).json({message: "You are already registered for this event"});
         }
         event.attendees.push(userId);
+        const eventWithAttendanceStatus = {
+            ...event.toObject(),
+            isAttending: event.attendees.some(id => id.toString() === userId.toString())
+        };
         await event.save();
-        return res.status(200).json({success:true,data:event,message: "Registered successfully for the event"});
+        return res.status(200).json({success:true,data:eventWithAttendanceStatus,message: "Registered successfully for the event"});
     } catch (error) {
         console.log(error);
         return res.status(500).json({message: "Internal server error"});

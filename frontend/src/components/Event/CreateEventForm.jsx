@@ -14,20 +14,33 @@ const CreateEventForm = () => {
         category: 'Conference',
         maxAttendees: 100,
         status: 'Upcoming',
-        image: '',
+        image: null,
         isPublic: true,
         price: 0,
         tags: []
     });
+    const [preview, setPreview] = useState(null);
 
     const [tagInput, setTagInput] = useState('');
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setEventData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        const { name, value, type, checked, files } = e.target;
+
+        if (type === 'file') {
+            const file = files[0];
+            if (file) {
+                setEventData((prev) => ({
+                    ...prev,
+                    [name]: type === "file" ? files[0] : value
+                }));
+                setPreview(URL.createObjectURL(file));
+            }
+        } else {
+            setEventData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+        }
     };
 
     const handleTagKeyDown = (e) => {
@@ -57,38 +70,56 @@ const CreateEventForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!eventData.image) {
+            alert("Please select an image.");
+            return;
+        }
         const combinedDateTime = new Date(`${eventData.date}T${eventData.time}`);
-        const formData = {
-            ...eventData,
-            date: combinedDateTime
-        };
-        console.log('Form submitted:', formData);
+        const formData = new FormData();
+        formData.append("image", eventData.image);
+        formData.append("title", eventData.title);
+        formData.append("description", eventData.description);
+        formData.append("date", combinedDateTime.toISOString());
+        formData.append("location", eventData.location);
+        formData.append("category", eventData.category);
+        formData.append("maxAttendees", eventData.maxAttendees);
+        formData.append("status", eventData.status);
+        formData.append("isPublic", eventData.isPublic);
+        formData.append("price", eventData.price);
+        formData.append("tags", JSON.stringify(eventData.tags));
+        console.log("Form submitted:", formData);
         const url = `${import.meta.env.VITE_BACKEND}/event/create`;
-
-        const createEvent = await axios.post(url, formData, {
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (createEvent.data.success) {
-            toast.success(createEvent.data.message);
-            setEventData({
-                title: '',
-                description: '',
-                date: '',
-                time: '',
-                location: '',
-                category: 'Conference',
-                maxAttendees: 100,
-                status: 'Upcoming',
-                image: '',
-                isPublic: true,
-                price: 0,
-                tags: []
+        try {
+            const createEvent = await axios.post(url, formData, {
+                withCredentials: true,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
             });
+            if (createEvent.data.success) {
+                toast.success(createEvent.data.message);
+
+                setEventData({
+                    title: '',
+                    description: '',
+                    date: '',
+                    time: '',
+                    location: '',
+                    category: 'Conference',
+                    maxAttendees: 100,
+                    status: 'Upcoming',
+                    image: null,
+                    isPublic: true,
+                    price: 0,
+                    tags: []
+                });
+            }
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            toast.error("Upload failed. Please try again.");
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -305,8 +336,8 @@ const CreateEventForm = () => {
                                             id="file-upload"
                                             name="image"
                                             type="file"
+                                            accept='image/*'
                                             className="sr-only"
-                                            accept="image/*"
                                             onChange={handleChange}
                                         />
                                     </label>
@@ -315,7 +346,14 @@ const CreateEventForm = () => {
                                 <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                             </div>
                         </div>
+                        {preview && (
+                            <div className="mt-4">
+                                <p className="text-sm font-medium">Preview:</p>
+                                <img src={preview} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-md" />
+                            </div>
+                        )}
                     </div>
+
 
                     <div className="flex justify-end space-x-3">
                         <button
