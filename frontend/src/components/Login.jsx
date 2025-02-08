@@ -1,16 +1,17 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import axios from "axios"
 import { toast } from 'react-toastify';
 import { ImCross } from "react-icons/im";
-
 import './Login.css'
-const Login = ({ setIsLogin }) => {
-    const [currState, setCurrState] = useState("Login")
+
+const Login = ({ setIsLogin , setIsGuestLogin}) => {
+    const [currState, setCurrState] = useState("Login");
     const [data, setData] = useState({
         name: "",
         email: "",
         password: ""
-    })
+    });
+
     const onChangeHandler = (event) => {
         const name = event.target.name;
         const value = event.target.value;
@@ -19,32 +20,35 @@ const Login = ({ setIsLogin }) => {
 
     const onLogin = async (event) => {
         event.preventDefault();
-        var newUrl = "http://localhost:3000"
+        let newUrl = "http://localhost:3000";
         if (currState === 'Login') {
-            newUrl += "/user/login"
+            newUrl += "/user/login";
         } else {
-            newUrl += "/user/signup"
+            newUrl += "/user/signup";
         }
-        console.log("newUrl ", newUrl)
-        console.log("data ", data)
-
 
         try {
             const response = await axios.post(newUrl, data, {
                 withCredentials: true,
                 headers: { "Content-Type": "application/json" },
-            })
+            });
 
             if (response.data.data) {
-                setIsLogin(false);
+                setIsLogin(true);  // Successfully logged in
                 toast.success(response.data.message);
             }
-
         } catch (error) {
-            alert("Unsuccessfully login/signup")
-            toast.error("User Not Register or wrong credendials")
+            alert("Unsuccessfully login/signup");
+            toast.error("User Not Registered or wrong credentials");
         }
     }
+
+    // Handle guest login (bypassing login/signup)
+    const onGuestLogin = () => {
+        setIsGuestLogin(true); 
+        toast.success("Logged in as Guest");
+    }
+
     return (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-1 z-1">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
@@ -95,19 +99,27 @@ const Login = ({ setIsLogin }) => {
                     </button>
                 </form>
 
-                <p className="text-center mt-3 text-black">
-                    {currState === "Login" ? "Create an account" : "Already have an account?"}
-                    <span
-                        className="text-red-500 font-semibold cursor-pointer ml-1"
-                        onClick={() => setCurrState(currState === "Login" ? "SignUp" : "Login")}
+                <div className="text-center mt-3 text-black">
+                    <p>
+                        {currState === "Login" ? "Create an account" : "Already have an account?"}
+                        <span
+                            className="text-red-500 font-semibold cursor-pointer ml-1"
+                            onClick={() => setCurrState(currState === "Login" ? "SignUp" : "Login")}
+                        >
+                            {currState === "Login" ? "Click here" : "Login here"}
+                        </span>
+                    </p>
+                    {/* Guest Login Button */}
+                    <button
+                        onClick={onGuestLogin}
+                        className="w-full bg-gray-300 text-black p-2 rounded-md font-semibold hover:bg-gray-400 transition duration-300 mt-4"
                     >
-                        {currState === "Login" ? "Click here" : "Login here"}
-                    </span>
-                </p>
+                        Continue as Guest
+                    </button>
+                </div>
             </div>
         </div>
     );
 }
 
-export default Login
-
+export default Login;

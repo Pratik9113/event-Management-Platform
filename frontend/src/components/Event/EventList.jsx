@@ -8,7 +8,7 @@ import io from 'socket.io-client';
 import axios from "axios";
 import EventDashboard from './EventDashboard';
 
-const EventList = () => {
+const EventList = ({ isGuestLogin }) => {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isRegistered, setIsRegistered] = useState(null);
@@ -31,7 +31,6 @@ const EventList = () => {
                 if (response.data.success) {
                     setEvents(response.data.data);
                     setIsRegistered(response.data.data.isAttending); // You need to set if the user is registered
-                    toast.success("Successfully fetched events");
                 } else {
                     toast.error("No events found.");
                 }
@@ -106,6 +105,7 @@ const EventList = () => {
                 activeFilter={activeFilter}
                 events={filteredEvents}
                 socket={socket}
+                isGuestLogin={isGuestLogin}
             />
         </div>
     );

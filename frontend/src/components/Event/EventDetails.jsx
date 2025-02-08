@@ -5,7 +5,7 @@ import { Calendar, Clock, MapPin, Users, Tag, DollarSign } from 'lucide-react';
 import { toast } from 'react-toastify';
 import io from 'socket.io-client';
 import axios from "axios"
-const EventDetails = ({ event, onClose, socket }) => {
+const EventDetails = ({ isGuestLogin, event, onClose, socket }) => {
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',
@@ -19,6 +19,10 @@ const EventDetails = ({ event, onClose, socket }) => {
 
 
     const handleRegister = async (event) => {
+        if (isGuestLogin) {
+            toast.warning("You cannot register as a guest. Please log in to register for events.");
+            return;
+        }
         const url = `${import.meta.env.VITE_BACKEND}/event/register`;
         const data = { eventId: event._id };
         try {

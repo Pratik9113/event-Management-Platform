@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import EventCard from './EventCard';
 import EventDetails from './EventDetails';
 
-const EventDashboard = ({ setActiveFilter, filterButtons, activeFilter, events, socket }) => {
+const EventDashboard = ({ setActiveFilter, filterButtons, activeFilter, events, socket, isGuestLogin }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -24,7 +24,7 @@ const EventDashboard = ({ setActiveFilter, filterButtons, activeFilter, events, 
 
     return (
         <div className="bg-white">
-            <nav className="bg-white shadow-sm top-0 z-50 border-b">
+            <nav className="bg-white sticky shadow-sm top-0 z-50 border-b">
                 <div className="mx-auto px-4">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
@@ -96,6 +96,7 @@ const EventDashboard = ({ setActiveFilter, filterButtons, activeFilter, events, 
 
             {selectedEvent && (
                 <EventDetails
+                    isGuestLogin={isGuestLogin}
                     event={selectedEvent}
                     onClose={() => setSelectedEvent(null)}
                     socket={socket}
