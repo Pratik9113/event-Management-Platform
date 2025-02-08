@@ -19,7 +19,7 @@ const io = new Server(server, {
     cors: {
         origin: [
             "https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app",
-            
+            "http://localhost:5173"
         ],
         methods: ["GET", "POST"],
         credentials:true,
@@ -29,7 +29,10 @@ const io = new Server(server, {
 
 // CORS configuration for frontend
 app.use(cors({
-    origin: ["https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app", "http://localhost:3000"], 
+    origin: [
+        "https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app",
+        "http://localhost:5173"
+    ], 
     credentials: true, // Allow credentials (cookies)
 }))
 
