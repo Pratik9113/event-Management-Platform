@@ -1,16 +1,19 @@
 const jwt = require('jsonwebtoken');
-const jwtAuth = (req, res, next)=>{
+
+const jwtAuth = (req, res, next) => {
     try {
-        const token = req.cookies.token;
-        if(!token){
-            return res.status(401).json({message: "Unauthorized"});
+        if (!req.cookies || !req.cookies.token) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
         }
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        const payload = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
         req.userId = payload.userId;
         next();
     } catch (error) {
-        console.log("Unauthorized : ",error);
-        return res.status(401).json({message: "Unauthorized"});
+        console.error("Unauthorized: ", error.message);
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({ message: "Unauthorized: Token has expired" });
+        }
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
 }
 
