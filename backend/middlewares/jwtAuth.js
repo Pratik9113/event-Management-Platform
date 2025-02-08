@@ -5,6 +5,7 @@ const jwtAuth = (req, res, next) => {
         if (!req.cookies || !req.cookies.token) {
             return res.status(401).json({ message: "Unauthorized: No token provided" });
         }
+        console.log("token : ", req.cookies.token)
         const payload = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
         req.userId = payload.userId;
         next();
