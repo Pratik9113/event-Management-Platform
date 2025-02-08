@@ -2,7 +2,7 @@ const cron = require("node-cron");
 const EventModel = require("./models/EventSchema");
 
 const node_cron = async() => {
-        cron.schedule("* * * * *", async () => { 
+        cron.schedule("0 * * * *", async () => { 
         console.log("🔄 Updating event statuses...");
         const currentDate = new Date();
 
