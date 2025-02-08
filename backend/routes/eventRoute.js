@@ -5,7 +5,7 @@ const upload = require("../multer.js");
 const EventRouter = express.Router();
 
 EventRouter.post("/create", jwtAuth, upload.single("image"), eventController);
-EventRouter.get("/all",jwtAuth, getAllEventController); 
+EventRouter.get("/all", getAllEventController); 
 EventRouter.get("/all-user",jwtAuth, getEventControllerForEventManager);
 EventRouter.post("/register", jwtAuth, registerStudentForEventController);
 

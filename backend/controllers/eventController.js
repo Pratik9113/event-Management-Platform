@@ -54,7 +54,6 @@ const eventController = async(req,res)=>{
 
 
 const getAllEventController = async (req, res) => {
-    const userId = req.userId;
     try {
         const events = await EventModel.find({ isPublic: true });
         if (!events || events.length === 0) {
@@ -63,13 +62,10 @@ const getAllEventController = async (req, res) => {
                 message: "No public events found",
             });
         }
-        const eventsWithAttendanceStatus = events.map(event => ({
-            ...event.toObject(),
-            isAttending: event.attendees.some(id => id.toString() === userId.toString())
-        }));
+
         res.status(200).json({
             success: true,
-            data: eventsWithAttendanceStatus
+            data: events
         });
     } catch (error) {
         console.error("Error fetching public events:", error);
