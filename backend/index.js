@@ -17,7 +17,10 @@ const app = express();
 const server = createServer(app); 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: [
+            "https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app/",
+            "http://localhost:5173"
+        ],
         methods: ["GET", "POST"]
     }
 });
