@@ -1,20 +1,50 @@
 const EventModel = require("../models/EventSchema.js");
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
+const path = require('path');
 
 const eventController = async(req,res)=>{
     const {title, description, date, location,
         category, maxAttendees, status, image,
         isPublic, companyId, price, tags} = req.body;
+    cloudinary.config({
+        cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+        api_key:process.env.CLOUDINARY_API_KEY,
+        api_secret:process.env.CLOUDINARY_SECRET_KEY
+    })
     const userId = req.userId;
     if(!title || !description || !date || !location || !category){
         return res.status(400).json({message: "Please fill all the fields"});
     }
     try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        console.log("File is", req.file);
+        const filePath = req.file.path;
+        if (!fs.existsSync(filePath)) {
+            return res.status(400).json({ message: "File not found on server" });
+        }
+        const cld_upload = await cloudinary.uploader.upload(filePath, {
+            resource_type: "image",
+            folder: "images", // Specifying the types of the media (i.e videos)
+        });
+        console.log("Cloudinary Metadata", cld_upload);
+
         const newEvent = new EventModel({
             title, description, date, location,
             category, organizer: userId, maxAttendees,
-            status, image, isPublic, companyId, price, tags
+            status, image:cld_upload.secure_url, isPublic, companyId, price, tags
         });
         await newEvent.save();
+        fs.unlink(filePath, (err) => {
+            if (err) {
+            console.error("Failed to delete local file:", err);
+            } else {
+            console.log("Local file deleted successfully");
+            }
+        });
+
         res.status(201).json({success:true,data:newEvent,message: "Event created successfully"});
     } catch (error) {
         console.log(error);
