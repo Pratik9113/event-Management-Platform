@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { ImCross } from "react-icons/im";
 import './Login.css'
 
-const Login = ({ setIsLogin , setIsGuestLogin}) => {
+const Login = ({ setIsLogin, setIsGuestLogin }) => {
     const [currState, setCurrState] = useState("Login");
     const [data, setData] = useState({
         name: "",
@@ -20,7 +20,7 @@ const Login = ({ setIsLogin , setIsGuestLogin}) => {
 
     const onLogin = async (event) => {
         event.preventDefault();
-        let newUrl = "http://localhost:3000";
+        let newUrl = `${import.meta.env.VITE_BACKEND}`;
         if (currState === 'Login') {
             newUrl += "/user/login";
         } else {
@@ -45,7 +45,7 @@ const Login = ({ setIsLogin , setIsGuestLogin}) => {
 
     // Handle guest login (bypassing login/signup)
     const onGuestLogin = () => {
-        setIsGuestLogin(true); 
+        setIsGuestLogin(true);
         toast.success("Logged in as Guest");
     }
 
