@@ -18,7 +18,7 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: [
-            "https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app/",
+            "https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app",
             
         ],
         methods: ["GET", "POST"]
@@ -28,7 +28,7 @@ const io = new Server(server, {
 
 // CORS configuration for frontend
 app.use(cors({
-    origin: ["https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app/"], // Frontend URL
+    origin: ["https://event-management-platform-f6a7xbswz-pratiks-projects-a5401834.vercel.app"], // Frontend URL
     credentials: true,  // Allow credentials (cookies)
 }));
 
