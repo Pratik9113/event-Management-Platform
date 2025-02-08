@@ -22,10 +22,7 @@ const loginController = async(req, res) => {
         });
 
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", 
-            sameSite: "Strict",
-            expires: new Date(Date.now() + 24 * 60 * 60 * 1000), 
+            httpOnly: true, secure: true, sameSite: 'none'
         });
         return res.status(200).json({data:user, token:token, message: "Login successful!", user });
     } catch (error) {
@@ -60,10 +57,7 @@ const signupController = async (req, res) => {
             expiresIn: "1d",
         });
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict",
-            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            httpOnly: true, secure: true, sameSite: 'none'
         });
 
         return res.status(201).json({ 
