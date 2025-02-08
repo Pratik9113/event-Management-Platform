@@ -46,7 +46,7 @@ const Login = ({ setIsLogin }) => {
         }
     }
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-1 z-1">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
                 <div className="flex justify-between items-center text-black">
                     <h2 className="text-xl font-semibold">{currState}</h2>

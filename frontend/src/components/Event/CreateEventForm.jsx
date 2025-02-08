@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, Upload, Tags } from 'lucide-react';
 import axios from "axios"
 import { toast } from 'react-toastify';
-
+import { useNavigate } from 'react-router-dom';
 const CreateEventForm = () => {
+    const navigate = useNavigate();
     const [eventData, setEventData] = useState({
         title: '',
         description: '',
@@ -49,6 +50,11 @@ const CreateEventForm = () => {
         }));
     };
 
+    const onClose = (e) => {
+        e.preventDefault();
+        navigate("/")
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const combinedDateTime = new Date(`${eventData.date}T${eventData.time}`);
@@ -88,8 +94,15 @@ const CreateEventForm = () => {
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-3xl mx-auto">
                 <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Event</h1>
-
+                    <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Event</h1>
+                        <button
+                            onClick={(e) => onClose(e)}
+                            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                        >
+                            ×
+                        </button>
+                    </div>
                     {/* Basic Information */}
                     <div className="space-y-4">
                         <div>

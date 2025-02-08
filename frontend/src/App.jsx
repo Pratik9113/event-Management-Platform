@@ -13,18 +13,17 @@ const App = () => {
     <Router>
       <ToastContainer position="top-right" autoClose={3000} />
       {isLogin && <Login setIsLogin={setIsLogin} />}
-      {!isLogin &&
-        <>
-          <Navbar />
-          <Routes>
-            {/* <Route path="/" element={<Login />} />
+
+      <>
+        <Routes>
+          {/* <Route path="/" element={<Login />} />
         <Route path='/' element={<EventList />} />
         <Route path='/' element={<CreateEventForm />} /> */}
-            <Route path='/' element={<EventList />} />
-            <Route path='/create' element={<CreateEventForm />} />
-          </Routes>
-        </>
-      }
+          <Route path='/' element={<EventList />} />
+          <Route path='/create' element={<CreateEventForm />} />
+        </Routes>
+      </>
+
     </Router>
   )
 }

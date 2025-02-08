@@ -27,7 +27,6 @@ const getAllEventController = async (req, res) => {
     const userId = req.userId;
     try {
         const events = await EventModel.find({ isPublic: true });
-        console.log(events);
         if (!events || events.length === 0) {
             return res.status(404).json({
                 success: false,

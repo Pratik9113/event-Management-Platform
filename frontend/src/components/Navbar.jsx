@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { Menu, X, UserCircle, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import assets from '../assets/assets';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     return (
         <nav className="bg-white shadow-lg">
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="mx-auto px-4">
                 <div className="flex justify-between h-18">
                     <div className="flex items-center">
-                        <span className="text-xl font-bold">Logo</span>
+                        <span className="text-xl font-bold flex items-center space-x-2">
+                            <img src={assets.companyLogo} alt="Logo" className="w-8 h-8 object-contain" />
+                            <span>Event</span>
+                        </span>
                     </div>
 
-                    {/* Mobile menu button */}
                     <div className="flex items-center md:hidden">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -25,10 +28,10 @@ const Navbar = () => {
                     {/* Desktop menu */}
                     <div className="hidden md:flex items-center space-x-4">
                         <button className="flex items-center px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100"
-                            onClick={()=> (navigate("/create"))}
+                            onClick={() => (navigate("/create"))}
                         >
                             <Calendar className="mr-2" size={20} />
-                            Create Event 
+                            Create Event
                         </button>
                         <button className="flex items-center px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
                             <UserCircle className="mr-2" size={20} />

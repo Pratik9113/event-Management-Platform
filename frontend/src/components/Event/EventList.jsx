@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin, Users, Tag, DollarSign } from 'lucide-react';
 import { UserCircle, Search, Filter, Menu, X, TrendingUp } from 'lucide-react';
-
+import io from 'socket.io-client';
 import axios from "axios";
+import EventDashboard from './EventDashboard';
 const EventList = () => {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -16,22 +17,27 @@ const EventList = () => {
         });
     };
 
-    const [isOpen, setIsOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredEvents = events.filter(event => {
-        if (activeFilter === "Upcoming") {
-            return new Date(event.date) > new Date(); 
-        }
-        return true; 
-    });
+    const [filteredEvents, setFilteredEvents] = useState([]);
+    useEffect(() => {
+        const filtered = events.filter(event => {
+            if (activeFilter === 'all') return true;
+            return event.status.toLowerCase() === activeFilter.toLowerCase();
+        });
+
+        setFilteredEvents(filtered);
+    }, [activeFilter, events]);
 
     const filterButtons = [
         { id: 'all', icon: <TrendingUp size={18} />, label: 'All Events' },
         { id: 'Upcoming', icon: <Clock size={18} />, label: 'Upcoming' },
-        { id: 'Ongoing', icon: <Calendar size={18} />, label: 'Ongoing' }
+        { id: 'Past', icon: <Calendar size={18} />, label: 'Past' }
     ];
+
+
+    const [socket, setSocket] = useState(null);
+    const [userSelectedEvent, setUserSelectedEvent] = useState(null);
 
     useEffect(() => {
         const getAllEvent = async () => {
@@ -49,6 +55,20 @@ const EventList = () => {
                 } else {
                     alert("Error in fetching data");
                 }
+                const socketInstance = io(import.meta.env.VITE_BACKEND);
+                setSocket(socketInstance);
+
+                socketInstance.on('updateAttendeeList', (updatedEvent) => {
+                    setEvents((prevEvents) =>
+                        prevEvents.map((event) =>
+                            event._id === updatedEvent._id ? updatedEvent : event
+                        )
+                    );
+                });
+
+                return () => {
+                    socketInstance.disconnect();
+                };
             } catch (error) {
                 console.error(error);
                 alert("Error in fetching data");
@@ -61,6 +81,7 @@ const EventList = () => {
     const handleRegister = async (event) => {
         const url = `${import.meta.env.VITE_BACKEND}/event/register`;
         const data = { eventId: event._id };
+        const eventId = event._id
         try {
             const response = await axios.post(url, data, {
                 withCredentials: true,
@@ -71,6 +92,11 @@ const EventList = () => {
             if (response.data.success) {
                 alert("Registered successfully");
                 setSelectedEvent(null);
+                if (socket) {
+                    socket.emit('enrollment', eventId);
+                } else {
+                    print("Not connected with socket");
+                }
             } else {
                 alert("Already Registered for the event ");
             }
@@ -85,65 +111,70 @@ const EventList = () => {
 
     const EventCard = ({ event }) => (
         <div
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer mb-4 overflow-hidden p-12"
+            className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden m-2.5"
             onClick={() => setSelectedEvent(event)}
         >
-            <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-semibold">{event.title}</h3>
-                    <span className={`
-            px-2 py-1 rounded-full text-sm
-            ${event.status === 'Upcoming' ? 'bg-green-100 text-green-800' :
-                            event.status === 'Ongoing' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'}
-          `}>
-                        {event.status}
-                    </span>
+            <div className="relative">
+                <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <span className={`
+              absolute top-4 right-4 px-3 py-1.5 rounded-full text-sm font-medium
+              ${event.status === 'Upcoming' ? 'bg-green-100 text-green-800' :
+                        event.status === 'Ongoing' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'}
+            `}>
+                    {event.status}
+                </span>
+            </div>
+
+            <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 group-hover:text-blue-600 transition-colors">
+                    {event.title}
+                </h3>
+
+                <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3 text-gray-600">
+                        <Calendar className="w-5 h-5 text-blue-500" />
+                        <span className="text-sm">{formatDate(event.date)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-gray-600">
+                        <MapPin className="w-5 h-5 text-blue-500" />
+                        <span className="text-sm">{event.location}</span>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-gray-600 mb-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>{formatDate(event.date)}</span>
-                </div>
+                <p className="text-gray-600 text-sm mb-6 line-clamp-2">
+                    {event.description}
+                </p>
 
-                <div className="flex items-center gap-2 text-gray-600 mb-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{event.location}</span>
-                </div>
-
-                <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-6">
                     {event.tags.map(tag => (
                         <span
                             key={tag}
-                            className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm"
+                            className="bg-gray-50 text-gray-600 px-3 py-1 rounded-full text-sm border border-gray-100"
                         >
                             {tag}
                         </span>
                     ))}
                 </div>
 
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        <span>{event.attendees.length}/{event.maxAttendees}</span>
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-gray-600">
+                        <Users className="w-5 h-5 text-blue-500" />
+                        <span className="text-sm font-medium">{event.attendees.length}/{event.maxAttendees}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-green-600 font-semibold">
-                        <DollarSign className="w-4 h-4" />
-                        <span>{event.price}</span>
+                    <div className="flex items-center gap-2 text-green-600">
+                        <DollarSign className="w-5 h-5" />
+                        <span className="font-semibold">{event.price}</span>
                     </div>
                 </div>
             </div>
         </div>
     );
-
-
 
 
     const EventDetails = ({ event, onClose }) => (
@@ -206,7 +237,7 @@ const EventList = () => {
                         </div>
 
                         <button onClick={() => handleRegister(event)} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors mt-4">
-                            {isRegistered ? "Register Now" : "Already Registered "}
+                            {event.isAttending ? "Already Registered " : "Register Now"}
                         </button>
                     </div>
                 </div>
@@ -214,89 +245,11 @@ const EventList = () => {
         </div>
     );
 
-    const EventDashboard = () => (
-        <div className="bg-white">
-            <nav className="bg-white shadow-sm sticky top-0 z-50 border-b">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="flex justify-between h-16">
-                        {/* Logo */}
-                        <div className="flex items-center">
-                            <span className="text-2xl font-bold text-gray-800">
-                                EventHub
-                            </span>
-                        </div>
-
-                        <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
-                            <div className="relative w-full">
-                                <input
-                                    type="text"
-                                    placeholder="Search events..."
-                                    className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none bg-gray-50"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
-                            </div>
-                        </div>
-
-                        <div className="hidden md:flex items-center space-x-4">
-                            <button className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all">
-                                Create Event
-                            </button>
-                            <button className="p-2 rounded-lg hover:bg-gray-100 transition-all">
-                                <UserCircle size={24} className="text-gray-600" />
-                            </button>
-                        </div>
-
-                        <div className="md:hidden flex items-center">
-                            <button
-                                onClick={() => setIsOpen(!isOpen)}
-                                className="p-2 rounded-lg hover:bg-gray-100"
-                            >
-                                {isOpen ? <X size={24} /> : <Menu size={24} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Filter Pills */}
-                    <div className="py-3 flex items-center gap-3 overflow-x-auto">
-                        {filterButtons.map((button) => (
-                            <button
-                                key={button.id}
-                                onClick={() => setActiveFilter(button.id)}
-                                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all
-                  ${activeFilter === button.id
-                                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                                        : 'text-gray-600 hover:bg-gray-50'}`}
-                            >
-                                <span className="mr-2">{button.icon}</span>
-                                {button.label}
-                            </button>
-                        ))}
-                    </div>
-
-                </div>
-
-                {/* Mobile Menu */}
-                <div className={`md:hidden ${isOpen ? 'block' : 'hidden'} border-t border-gray-100`}>
-                    <div className="p-4 space-y-4 bg-white">
-                        <input
-                            type="text"
-                            placeholder="Search events..."
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none"
-                        />
-                        <button className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">
-                            Create Event
-                        </button>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    )
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <EventDashboard />
+            <EventDashboard setActiveFilter={setActiveFilter} filterButtons={filterButtons} activeFilter={activeFilter} />
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEvents.map(event => (
                     <EventCard key={event._id} event={event} />
